@@ -58,6 +58,7 @@ struct rnh {
 
 	/* VRF identifier. */
 	vrf_id_t vrf_id;
+	vrf_id_t lookup_backup;
 
 	afi_t afi;
 	safi_t safi;

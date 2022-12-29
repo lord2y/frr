@@ -778,6 +778,7 @@ enum zclient_send_status zclient_send_rnh(struct zclient *zclient, int command,
 					  vrf_id_t vrf_id)
 {
 	struct stream *s;
+	uint8_t table_id_backup = 100;
 
 	s = zclient->obuf;
 	stream_reset(s);
@@ -785,6 +786,7 @@ enum zclient_send_status zclient_send_rnh(struct zclient *zclient, int command,
 	stream_putc(s, (connected) ? 1 : 0);
 	stream_putc(s, (resolve_via_def) ? 1 : 0);
 	stream_putw(s, safi);
+	stream_putc(s, table_id_backup);
 	stream_putw(s, PREFIX_FAMILY(p));
 	stream_putc(s, p->prefixlen);
 	switch (PREFIX_FAMILY(p)) {
