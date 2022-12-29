@@ -31,7 +31,7 @@ extern "C" {
 
 extern void zebra_rnh_init(void);
 
-extern struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, safi_t safi,
+extern struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, safi_t safi, uint8_t table_id_backup,
 				 bool *exists);
 extern struct rnh *zebra_lookup_rnh(struct prefix *p, vrf_id_t vrfid,
 				    safi_t safi);
