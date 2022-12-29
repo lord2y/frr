@@ -133,7 +133,7 @@ static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 	route_unlock_node(rn);
 }
 
-struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, safi_t safi,
+struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, safi_t safi, uint8_t table_id_backup,
 			  bool *exists)
 {
 	struct route_table *table;
@@ -177,6 +177,7 @@ struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, safi_t safi,
 		rnh->resolved_route.family = p->family;
 		rnh->client_list = list_new();
 		rnh->vrf_id = vrfid;
+		rnh->lookup_backup = table_id_backup;
 		rnh->seqno = 0;
 		rnh->afi = afi;
 		rnh->safi = safi;
@@ -346,7 +347,12 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 		return;
 
 	addr2hostprefix(pw->af, &pw->nexthop, &nh);
-	rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, &exists);
+	/*
+	 * Compiler Warning: (needs to be fixed)
+	 * zebra/zebra_rnh.c:350:56: warning: passing argument 4 of ‘zebra_add_rnh’ makes integer from pointer without a cast [-Wint-conversion]
+         * 350 |         rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, NULL,  &exists);
+	 */
+	rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, NULL, &exists);
 	if (!rnh)
 		return;
 
