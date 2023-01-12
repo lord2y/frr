@@ -587,7 +587,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	 * most-specific match. Do similar logic as in zebra_rib.c
 	 */
 	while (rn) {
-		zlog_info("%s: rnh->node=> %pRN, rn=> %pRN, rnh->lookup_backup",__func__, rnh->node, rn, rnh->lookup_backup);
+		zlog_info("%s: rnh->node=> %pRN, rn=> %pRN, rnh->lookup_backup=> %u",__func__, rnh->node, rn, rnh->lookup_backup);
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
 			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN",
 				   __func__, VRF_LOGNAME(zvrf->vrf),
