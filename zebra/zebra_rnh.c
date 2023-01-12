@@ -566,14 +566,13 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 				struct route_node *nrn, const struct rnh *rnh,
 				struct route_node **prn)
 {
-	struct route_table *route_table;
+	struct route_table *route_table = zvrf->table[afi][rnh->safi];
 	struct route_node *rn;
 	struct route_entry *re;
-        struct rib_table_info *info = route_table_get_info(zvrf->table[afi][rnh->safi]);
+        struct rib_table_info *info = route_table_get_info(route_table);
 
 	*prn = NULL;
 
-	route_table = zvrf->table[afi][rnh->safi];
 	zlog_debug("table_id: %u", info->table_id);
 
 	if (!route_table)
