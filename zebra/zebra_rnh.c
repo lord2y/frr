@@ -435,12 +435,12 @@ static void zebra_rnh_notify_protocol_clients(struct zebra_vrf *zvrf, afi_t afi,
 
 	if (IS_ZEBRA_DEBUG_NHT) {
 		if (prn && re) {
-			zlog_debug("%s(%u):%pRN: NH resolved over route %pRN",
-				   VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
+			zlog_debug("%s: %s(%u):%pRN: NH resolved over route %pRN",
+				   __func__, VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
 				   nrn, prn);
 		} else
-			zlog_debug("%s(%u):%pRN: NH has become unresolved",
-				   VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
+			zlog_debug("%s: %s(%u):%pRN: NH has become unresolved",
+				   __func__, VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
 				   nrn);
 	}
 
