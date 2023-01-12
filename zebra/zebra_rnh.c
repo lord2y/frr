@@ -573,8 +573,6 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 
 	*prn = NULL;
 
-	zlog_debug("table_id: %u", info->table_id);
-
 	if (!route_table)
 		return NULL;
 
@@ -591,9 +589,9 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	while (rn) {
 		zlog_info("%s: rnh->node=> %pRN, rn=> %pRN, rnh->lookup_backup=> %u",__func__, rnh->node, rn, rnh->lookup_backup);
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
-			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN",
+			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN, table_id: %u",
 				   __func__, VRF_LOGNAME(zvrf->vrf),
-				   rnh->vrf_id, rnh->node, rn);
+				   rnh->vrf_id, rnh->node, rn, info->table_id);
 
 		/* Do not resolve over default route unless allowed &&
 		 * match route to be exact if so specified
