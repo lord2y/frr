@@ -832,10 +832,6 @@ void zebra_rib_evaluate_rn_nexthops(struct route_node *rn, uint32_t seq,
 	 * would match a more specific route
 	 */
 	while (rn) {
-		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
-			zlog_debug(
-				"%s: rnh->node=> %pRN, rn=> %pRN, rnh->lookup_backup=> %u",
-				__func__, rnh->node, rn, rnh->lookup_backup);
 
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
 			zlog_debug(
@@ -862,6 +858,11 @@ void zebra_rib_evaluate_rn_nexthops(struct route_node *rn, uint32_t seq,
 		 * nexthop tracking evaluation code
 		 */
 		frr_each_safe(rnh_list, &dest->nht, rnh) {
+			if (IS_ZEBRA_DEBUG_NHT_DETAILED)
+				zlog_debug(
+				"%s: rnh->node=> %pRN, rn=> %pRN, rnh->lookup_backup=> %u",
+				__func__, rnh->node, rn, rnh->lookup_backup);
+
 			struct zebra_vrf *zvrf =
 				zebra_vrf_lookup_by_id(rnh->vrf_id);
 			struct prefix *p = &rnh->node->p;
