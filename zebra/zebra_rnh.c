@@ -574,7 +574,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	*prn = NULL;
 
 	route_table = zvrf->table[afi][rnh->safi];
-	zlog_info("table_id: %u", rt_info->table_id);
+	zlog_info("table_id: %u", rt_info->info->table_id);
 
 	if (!route_table)
 		return NULL;
