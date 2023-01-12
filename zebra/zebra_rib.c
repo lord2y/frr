@@ -834,7 +834,7 @@ void zebra_rib_evaluate_rn_nexthops(struct route_node *rn, uint32_t seq,
 	while (rn) {
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
 			zlog_debug(
-				"%s: %pRN Being examined for Nexthop Tracking Count: %zd - rnh->node=> %pRN, rnh->lookup_backup=> %u"",
+				"%s: %pRN Being examined for Nexthop Tracking Count: %zd - rnh->node=> %pRN, rnh->lookup_backup=> %u",
 				__func__, rn,
 				dest ? rnh_list_count(&dest->nht) : 0, rnh->node, rnh->lookup_backup);
 
