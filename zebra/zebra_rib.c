@@ -834,8 +834,8 @@ void zebra_rib_evaluate_rn_nexthops(struct route_node *rn, uint32_t seq,
 	while (rn) {
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
 			zlog_debug(
-				"%s: rnh->node=> %pRN, rn=> %pRN, rnh->lookup_backup=> %u",
-				__func__, rnh->node, rn, rnh->lookup_backup);
+				"%s: rn=> %pRN, rnh->lookup_backup=> %u",
+				__func__, rn, rnh->lookup_backup);
 
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
 			zlog_debug(
