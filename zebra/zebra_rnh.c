@@ -575,7 +575,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 
 	*prn = NULL;
 
-	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP){
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)){
 			route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
 			if (!route_table)
 				return NULL;
