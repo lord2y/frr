@@ -1249,6 +1249,9 @@ static void zread_rnh_register(ZAPI_HANDLER_ARGS)
 		if (resolve_via_default)
 			SET_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_DEFAULT);
 
+		if (table_id_backup)
+			SET_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)
+
 		if (orig_flags != rnh->flags)
 			flag_changed = true;
 

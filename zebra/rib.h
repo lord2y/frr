@@ -55,6 +55,7 @@ struct rnh {
 #define ZEBRA_NHT_CONNECTED 0x1
 #define ZEBRA_NHT_DELETED 0x2
 #define ZEBRA_NHT_RESOLVE_VIA_DEFAULT 0x4
+#define ZEBRA_NHT_RESOLVE_VIA_BACKUP 0x8
 
 	/* VRF identifier. */
 	vrf_id_t vrf_id;
