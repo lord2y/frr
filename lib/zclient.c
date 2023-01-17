@@ -768,11 +768,13 @@ enum zclient_send_status zclient_send_rnh(struct zclient *zclient, int command,
 					  bool exact_match, vrf_id_t vrf_id)
 {
 	struct stream *s;
+	uint8_t table_id_backup = 100;
 
 	s = zclient->obuf;
 	stream_reset(s);
 	zclient_create_header(s, command, vrf_id);
 	stream_putc(s, (exact_match) ? 1 : 0);
+	stream_putc(s, table_id_backup);
 
 	stream_putw(s, PREFIX_FAMILY(p));
 	stream_putc(s, p->prefixlen);

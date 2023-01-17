@@ -1179,6 +1179,7 @@ static void zread_rnh_register(ZAPI_HANDLER_ARGS)
 	bool exist;
 	bool flag_changed = false;
 	uint8_t orig_flags;
+	uint8_t table_id_backup;
 
 	if (IS_ZEBRA_DEBUG_NHT)
 		zlog_debug(
@@ -1196,7 +1197,8 @@ static void zread_rnh_register(ZAPI_HANDLER_ARGS)
 		STREAM_GETC(s, flags);
 		STREAM_GETW(s, p.family);
 		STREAM_GETC(s, p.prefixlen);
-		l += 4;
+		STREAM_GETC(s, table_id_backup);
+		l += 5;
 		if (p.family == AF_INET) {
 			client->v4_nh_watch_add_cnt++;
 			if (p.prefixlen > IPV4_MAX_BITLEN) {
@@ -1224,9 +1226,12 @@ static void zread_rnh_register(ZAPI_HANDLER_ARGS)
 				p.family);
 			return;
 		}
-		rnh = zebra_add_rnh(&p, zvrf_id(zvrf), type, &exist);
+		rnh = zebra_add_rnh(&p, zvrf_id(zvrf), type, table_id_backup, &exist);
 		if (!rnh)
 			return;
+
+		if (table_id_backup)
+			SET_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP);
 
 		orig_flags = rnh->flags;
 		if (type == RNH_NEXTHOP_TYPE) {

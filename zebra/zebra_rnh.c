@@ -135,7 +135,7 @@ static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 	route_unlock_node(rn);
 }
 
-struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, enum rnh_type type,
+struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, enum rnh_type type, uint8_t table_id_backup,
 			  bool *exists)
 {
 	struct route_table *table;
@@ -178,6 +178,7 @@ struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid, enum rnh_type type,
 		rnh->resolved_route.family = p->family;
 		rnh->client_list = list_new();
 		rnh->vrf_id = vrfid;
+		rnh->lookup_backup = table_id_backup;
 		rnh->type = type;
 		rnh->seqno = 0;
 		rnh->afi = afi;
@@ -342,6 +343,7 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 	struct rnh *rnh;
 	bool exists;
 	struct zebra_vrf *zvrf;
+	uint8_t table_id_backup = 100;
 
 	*nht_exists = false;
 
@@ -350,7 +352,7 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 		return;
 
 	addr2hostprefix(pw->af, &pw->nexthop, &nh);
-	rnh = zebra_add_rnh(&nh, vrf_id, RNH_NEXTHOP_TYPE, &exists);
+	rnh = zebra_add_rnh(&nh, vrf_id, RNH_NEXTHOP_TYPE, table_id_backup, &exists);
 	if (!rnh)
 		return;
 
@@ -538,12 +540,12 @@ static void zebra_rnh_notify_protocol_clients(struct zebra_vrf *zvrf, afi_t afi,
 
 	if (IS_ZEBRA_DEBUG_NHT) {
 		if (prn && re) {
-			zlog_debug("%s(%u):%pRN: NH resolved over route %pRN",
-				   VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
+			zlog_debug("%s: %s(%u):%pRN: NH resolved over route %pRN",
+				   __func__, VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
 				   nrn, prn);
 		} else
-			zlog_debug("%s(%u):%pRN: NH has become unresolved",
-				   VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
+			zlog_debug("%s: %s(%u):%pRN: NH has become unresolved",
+				   __func__, VRF_LOGNAME(zvrf->vrf), zvrf->vrf->vrf_id,
 				   nrn);
 	}
 
@@ -673,16 +675,30 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	struct route_table *route_table;
 	struct route_node *rn;
 	struct route_entry *re;
+	struct rib_table_info *info;
 
 	*prn = NULL;
 
-	route_table = zvrf->table[afi][SAFI_UNICAST];
-	if (!route_table)
-		return NULL;
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)){
+		route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
+		if (!route_table)
+			return NULL;
 
-	rn = route_node_match(route_table, &nrn->p);
-	if (!rn)
-		return NULL;
+		rn = route_node_match(route_table, &nrn->p);
+		if (!rn)
+			return NULL;
+	} else {
+		route_table = zvrf->table[afi][SAFI_UNICAST];
+
+		if (!route_table)
+			return NULL;
+
+		rn = route_node_match(route_table, &nrn->p);
+		if (!rn)
+			return NULL;
+	}
+	info = route_table_get_info(route_table);
+
 
 	/* Unlock route node - we don't need to lock when walking the tree. */
 	route_unlock_node(rn);
@@ -692,9 +708,9 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	 */
 	while (rn) {
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
-			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN",
+			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN, table_id %u",
 				   __func__, VRF_LOGNAME(zvrf->vrf),
-				   rnh->vrf_id, rnh->node, rn);
+				   rnh->vrf_id, rnh->node, rn, info->table_id);
 
 		/* Do not resolve over default route unless allowed &&
 		 * match route to be exact if so specified
