@@ -339,6 +339,7 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 	struct rnh *rnh;
 	bool exists;
 	struct zebra_vrf *zvrf;
+	uint8_t table_id_backup = 100;
 
 	*nht_exists = false;
 
@@ -351,8 +352,10 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 	 * Compiler Warning: (needs to be fixed)
 	 * zebra/zebra_rnh.c:350:56: warning: passing argument 4 of ‘zebra_add_rnh’ makes integer from pointer without a cast [-Wint-conversion]
          * 350 |         rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, NULL,  &exists);
+	 *
+	 * Trying to fix this properly hard coding the value
 	 */
-	rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, NULL, &exists);
+	rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, table_id_backup, &exists);
 	if (!rnh)
 		return;
 
