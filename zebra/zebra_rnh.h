@@ -44,7 +44,7 @@ static inline const char *rnh_type2str(enum rnh_type type)
 }
 
 extern struct rnh *zebra_add_rnh(struct prefix *p, vrf_id_t vrfid,
-				 enum rnh_type type, bool *exists);
+				 enum rnh_type type, uint8_t table_id_backup, bool *exists);
 extern struct rnh *zebra_lookup_rnh(struct prefix *p, vrf_id_t vrfid,
 				    enum rnh_type type);
 extern void zebra_free_rnh(struct rnh *rnh);
