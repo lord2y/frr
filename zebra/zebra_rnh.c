@@ -585,7 +585,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 
 			rn = route_node_match(route_table, &nrn->p);
 			if (!rn)
-			return NULL;
+				return NULL;
 	} else {
 			route_table = zvrf->table[afi][rnh->safi];
 
@@ -594,7 +594,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 
 			rn = route_node_match(route_table, &nrn->p);
 			if (!rn)
-			return NULL;
+				return NULL;
 	}
 	info = route_table_get_info(route_table);
 
