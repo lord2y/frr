@@ -347,7 +347,7 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 		return;
 
 	addr2hostprefix(pw->af, &pw->nexthop, &nh);
-	rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, rhn->lookup_backup , &exists);
+	rnh = zebra_add_rnh(&nh, vrf_id, SAFI_UNICAST, rnh->lookup_backup, &exists);
 	if (!rnh)
 		return;
 
