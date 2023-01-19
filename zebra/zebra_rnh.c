@@ -117,6 +117,8 @@ static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
 	struct route_table *table = zvrf->table[rnh->afi][rnh->safi];
 	struct route_node *rn;
+	struct rib_table_info *info = route_table_get_info(table);
+
 	rib_dest_t *dest;
 
 	rn = route_node_match(table, &rnh->resolved_route);
@@ -124,9 +126,9 @@ static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 		return;
 
 	if (IS_ZEBRA_DEBUG_NHT_DETAILED)
-		zlog_debug("%s: %s(%u):%pRN added for tracking on %pRN",
+		zlog_debug("%s: %s(%u):%pRN added for tracking on %pRN, table_id: %u",
 			   __func__, VRF_LOGNAME(zvrf->vrf), rnh->vrf_id,
-			   rnh->node, rn);
+			   rnh->node, rn, info->table_id);
 
 	dest = rib_dest_from_rnode(rn);
 	rnh_list_add_tail(&dest->nht, rnh);
