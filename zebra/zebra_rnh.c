@@ -88,7 +88,7 @@ static inline struct route_table *get_rnh_table(vrf_id_t vrfid, afi_t afi,
 	return t;
 }
 
-static inline struct route_table *get_rnh_table_with_table_id(vrf_id vrfid, afi_t afi,
+static inline struct route_table *get_rnh_table_with_table_id(vrf_id_t vrfid, afi_t afi,
 		                                              safi_t safi, uint32_t table_id_backup)
 {
 	struct zebra_vrf *zvrf;
