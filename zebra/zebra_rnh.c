@@ -88,6 +88,19 @@ static inline struct route_table *get_rnh_table(vrf_id_t vrfid, afi_t afi,
 	return t;
 }
 
+static inline struct route_table *get_rnh_table_with_table_id(vrf_id vrfid, afi_t afi,
+		                                              safi_t safi, uint32_t table_id_backup)
+{
+	struct zebra_vrf *zvrf;
+	struct route_table *t = NULL;
+
+	zvrf = zebra_vrf_lookup_by_id(vrfid);
+	if (table_id_backup == zvrf->table_id)
+		t = zebra_vrf_table(afi, safi, vrf_id);
+
+	return t;
+}
+
 static void zebra_rnh_remove_from_routing_table(struct rnh *rnh)
 {
 	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
@@ -569,7 +582,8 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	*prn = NULL;
 
 	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)){
-		route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
+		//route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
+		route_table = get_rnh_table_with_table_id(rnh->vrf_id, afi, rnh->safi, rnh->lookup_backup);
 		if (!route_table)
 			return NULL;
 
