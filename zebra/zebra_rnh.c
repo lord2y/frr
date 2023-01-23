@@ -96,7 +96,7 @@ static inline struct route_table *get_rnh_table_with_table_id(vrf_id_t vrfid, af
 
 	zvrf = zebra_vrf_lookup_by_id(vrfid);
 	if (table_id_backup == zvrf->table_id)
-		t = zebra_vrf_table(afi, safi, vrf_id);
+		t = zebra_vrf_table(afi, safi, vrfid);
 
 	return t;
 }
