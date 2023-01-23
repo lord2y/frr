@@ -749,8 +749,12 @@ static void zebra_rnh_evaluate_entry(struct zebra_vrf *zvrf, afi_t afi,
 	/* If the entry cannot be resolved and that is also the existing state,
 	 * there is nothing further to do.
 	 */
-	if (!re && rnh->state == NULL && !force)
+	if (!re && rnh->state == NULL && !force) {
+		if (IS_ZEBRA_DEBUG_NHT) {
+			zlog_debug("%s: rnh->state=>%u : Returns ", rnh->state);
+		}
 		return;
+	}
 
 	/* Process based on type of entry. */
 	zebra_rnh_eval_nexthop_entry(zvrf, afi, force, nrn, rnh, prn, re);
