@@ -1293,14 +1293,11 @@ static void zread_rnh_unregister(ZAPI_HANDLER_ARGS)
 		STREAM_GETC(s, ignore);
 		if (ignore != 0)
 			goto stream_failure;
-		STREAM_GETC(s, ignore);
-		if (ignore != 0)
-			goto stream_failure;
 
 		STREAM_GETW(s, safi);
 		STREAM_GETW(s, p.family);
 		STREAM_GETC(s, p.prefixlen);
-		l += 8;
+		l += 7;
 		if (p.family == AF_INET) {
 			client->v4_nh_watch_rem_cnt++;
 			if (p.prefixlen > IPV4_MAX_BITLEN) {
