@@ -71,6 +71,7 @@ void zebra_rnh_init(void)
 	hook_register(zserv_client_close, zebra_client_cleanup_rnh);
 }
 
+/*Doesn't work as expected*/
 static inline struct route_table *get_rnh_table(vrf_id_t vrfid, afi_t afi,
 						safi_t safi)
 {
@@ -582,8 +583,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	*prn = NULL;
 
 	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)){
-		//route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
-		route_table = get_rnh_table_with_table_id(rnh->vrf_id, afi, rnh->safi, rnh->lookup_backup);
+		route_table = zebra_vrf_get_table_with_table_id(afi, rnh->safi, rnh->vrf_id, rnh->lookup_backup);
 		if (!route_table)
 			return NULL;
 
