@@ -91,9 +91,14 @@ static inline struct route_table *get_rnh_table(vrf_id_t vrfid, afi_t afi,
 static void zebra_rnh_remove_from_routing_table(struct rnh *rnh)
 {
 	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
-	struct route_table *table = zvrf->table[rnh->afi][rnh->safi];
+	struct route_table *table;
 	struct route_node *rn;
 	rib_dest_t *dest;
+
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP))
+		table = zebra_router_get_table(zvrf, rnh->lookup_backup, rnh->afi, rnh->safi);
+	else
+		table = zvrf->table[rnh->afi][rnh->safi];
 
 	if (!table)
 		return;
@@ -115,9 +120,14 @@ static void zebra_rnh_remove_from_routing_table(struct rnh *rnh)
 static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 {
 	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
-	struct route_table *table = zvrf->table[rnh->afi][rnh->safi];
+	struct route_table *table;
 	struct route_node *rn;
 	rib_dest_t *dest;
+
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP))
+		table = zebra_router_get_table(zvrf, rnh->lookup_backup, rnh->afi, rnh->safi);
+	else
+		table = zvrf->table[rnh->afi][rnh->safi];
 
 	rn = route_node_match(table, &rnh->resolved_route);
 	if (!rn)
@@ -568,23 +578,18 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 
 	*prn = NULL;
 
-	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)){
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP))
 		route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
-		if (!route_table)
-			return NULL;
-
-		rn = route_node_match(route_table, &nrn->p);
-		if (!rn)
-			return NULL;
-	} else {
+	else
 		route_table = zvrf->table[afi][rnh->safi];
-		if (!route_table)
-			return NULL;
 
-		rn = route_node_match(route_table, &nrn->p);
-		if (!rn)
-			return NULL;
-	}
+	if (!route_table)
+		return NULL;
+
+	rn = route_node_match(route_table, &nrn->p);
+	if (!rn)
+		return NULL;
+
 	info = route_table_get_info(route_table);
 
 	/* Unlock route node - we don't need to lock when walking the tree. */
