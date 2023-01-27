@@ -365,7 +365,7 @@ void zebra_register_rnh_pseudowire(vrf_id_t vrf_id, struct zebra_pw *pw,
 		listnode_add(rnh->zebra_pseudowire_list, pw);
 		pw->rnh = rnh;
 		zebra_evaluate_rnh(zvrf, family2afi(pw->af), 1, &nh,
-				   SAFI_UNICAST);
+				   SAFI_UNICAST, rnh->lookup_backup);
 	} else
 		*nht_exists = true;
 }
@@ -787,12 +787,16 @@ static void zebra_rnh_clear_nhc_flag(struct zebra_vrf *zvrf, afi_t afi,
  * of a particular VRF and address-family or a specific prefix.
  */
 void zebra_evaluate_rnh(struct zebra_vrf *zvrf, afi_t afi, int force,
-			const struct prefix *p, safi_t safi)
+			const struct prefix *p, safi_t safi, uint8_t table_id_backup)
 {
 	struct route_table *rnh_table;
 	struct route_node *nrn;
 
-	rnh_table = get_rnh_table(zvrf->vrf->vrf_id, afi, safi);
+	if (table_id_backup)
+		rnh_table = zebra_router_get_table(zvrf, table_id_backup, afi, safi);
+	else
+		rnh_table = get_rnh_table(zvrf->vrf->vrf_id, afi, safi);
+
 	if (!rnh_table) // unexpected
 		return;
 

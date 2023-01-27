@@ -888,7 +888,7 @@ void zebra_rib_evaluate_rn_nexthops(struct route_node *rn, uint32_t seq,
 
 			rnh->seqno = seq;
 			zebra_evaluate_rnh(zvrf, family2afi(p->family), 0, p,
-					   rnh->safi);
+					   rnh->safi, rnh->lookup_backup);
 		}
 
 		rn = rn->parent;
