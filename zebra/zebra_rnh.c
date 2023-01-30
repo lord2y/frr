@@ -237,7 +237,10 @@ void zebra_free_rnh(struct rnh *rnh)
 	list_delete(&rnh->zebra_pseudowire_list);
 
 	zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
-	table = zvrf->table[family2afi(rnh->resolved_route.family)][rnh->safi];
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP))
+		table = zebra_router_get_table(zvrf, rnh->lookup_backup, family2afi(rnh->resolved_route.family), rnh->safi);
+	else
+		table = zvrf->table[family2afi(rnh->resolved_route.family)][rnh->safi];
 
 	if (table) {
 		struct route_node *rern;
