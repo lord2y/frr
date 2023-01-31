@@ -613,6 +613,7 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 		 */
 		if (is_default_prefix(&rn->p)
 		    && (!CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_DEFAULT)
+			&& !CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP)
 			&& !rnh_resolve_via_default(zvrf, rn->p.family))) {
 			if (IS_ZEBRA_DEBUG_NHT_DETAILED)
 				zlog_debug(
