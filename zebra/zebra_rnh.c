@@ -1471,6 +1471,7 @@ static int zebra_cleanup_rnh_client(vrf_id_t vrf_id, afi_t afi, safi_t safi,
 	struct route_table *ntable;
 	struct route_node *nrn;
 	struct rnh *rnh;
+	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
 
 	if (IS_ZEBRA_DEBUG_NHT) {
 		struct vrf *vrf = vrf_lookup_by_id(vrf_id);
@@ -1479,8 +1480,11 @@ static int zebra_cleanup_rnh_client(vrf_id_t vrf_id, afi_t afi, safi_t safi,
 			   VRF_LOGNAME(vrf), vrf_id,
 			   zebra_route_string(client->proto), afi2str(afi));
 	}
+	if (CHECK_FLAG(rnh->flags, ZEBRA_NHT_RESOLVE_VIA_BACKUP))
+		ntable = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, safi);
+	else
+		ntable = get_rnh_table(vrf_id, afi, safi);
 
-	ntable = get_rnh_table(vrf_id, afi, safi);
 	if (!ntable) {
 		zlog_debug("cleanup_rnh_client: rnh table not found");
 		return -1;
