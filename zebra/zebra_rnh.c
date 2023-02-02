@@ -114,6 +114,7 @@ static void zebra_rnh_remove_from_routing_table(struct rnh *rnh)
 
 	dest = rib_dest_from_rnode(rn);
 	rnh_list_del(&dest->nht, rnh);
+	zlog_debug("Removing %p to the rnh list", rnh);
 	route_unlock_node(rn);
 }
 
@@ -140,6 +141,7 @@ static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 
 	dest = rib_dest_from_rnode(rn);
 	rnh_list_add_tail(&dest->nht, rnh);
+	zlog_debug("Adding %p to the rnh list", rnh);
 	route_unlock_node(rn);
 }
 
