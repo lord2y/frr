@@ -91,9 +91,14 @@ static inline struct route_table *get_rnh_table(vrf_id_t vrfid, afi_t afi,
 static void zebra_rnh_remove_from_routing_table(struct rnh *rnh)
 {
 	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
-	struct route_table *table = zvrf->table[rnh->afi][rnh->safi];
+	struct route_table *table;
 	struct route_node *rn;
 	rib_dest_t *dest;
+
+	if (rnh->lookup_backup)
+		table = zebra_router_get_table(zvrf, rnh->lookup_backup, rnh->afi, rnh->safi);
+	else
+		table  = zvrf->table[rnh->afi][rnh->safi];
 
 	if (!table)
 		return;
@@ -115,9 +120,14 @@ static void zebra_rnh_remove_from_routing_table(struct rnh *rnh)
 static void zebra_rnh_store_in_routing_table(struct rnh *rnh)
 {
 	struct zebra_vrf *zvrf = zebra_vrf_lookup_by_id(rnh->vrf_id);
-	struct route_table *table = zvrf->table[rnh->afi][rnh->safi];
+	struct route_table *table; 
 	struct route_node *rn;
 	rib_dest_t *dest;
+
+	if (rnh->lookup_backup)
+		table = zebra_router_get_table(zvrf, rnh->lookup_backup, rnh->afi, rnh->safi);
+	else
+		table = zvrf->table[rnh->afi][rnh->safi];
 
 	rn = route_node_match(table, &rnh->resolved_route);
 	if (!rn)
@@ -564,16 +574,23 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	struct route_table *route_table;
 	struct route_node *rn;
 	struct route_entry *re;
+	struct rib_table_info *info;
 
 	*prn = NULL;
 
-	route_table = zvrf->table[afi][rnh->safi];
+	if (rnh->lookup_backup)
+		route_table = zebra_router_get_table(zvrf, rnh->lookup_backup, afi, rnh->safi);
+	else
+		route_table = zvrf->table[afi][rnh->safi];
+
 	if (!route_table)
 		return NULL;
 
 	rn = route_node_match(route_table, &nrn->p);
 	if (!rn)
 		return NULL;
+
+	info = route_table_get_info(route_table);
 
 	/* Unlock route node - we don't need to lock when walking the tree. */
 	route_unlock_node(rn);
@@ -583,9 +600,9 @@ zebra_rnh_resolve_nexthop_entry(struct zebra_vrf *zvrf, afi_t afi,
 	 */
 	while (rn) {
 		if (IS_ZEBRA_DEBUG_NHT_DETAILED)
-			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN",
+			zlog_debug("%s: %s(%u):%pRN Possible Match to %pRN on table %u",
 				   __func__, VRF_LOGNAME(zvrf->vrf),
-				   rnh->vrf_id, rnh->node, rn);
+				   rnh->vrf_id, rnh->node, rn, info->table_id);
 
 		/* Do not resolve over default route unless allowed &&
 		 * match route to be exact if so specified
